@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Yoga Session Results</title>
+
+  <!-- Chart.js + datalabel plugin -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root{
+      --bg: #f5fff5;
+      --card: #ffffff;
+      --muted: #666;
+      --accent: #4caf50;
+      --gap: 16px;
+    }
+    *{box-sizing: border-box}
+    body{
+      margin: 0;
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: #222;
+      padding: 18px;
+    }
+
+    header{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap }
+    header h1{ margin:0; font-size:20px; text-align: center; flex: 1; margin-bottom: 20px;}
+    .controls { display:flex; gap:8px; align-items:center; }
+    .controls button {
+      margin-top: 20px;
+      background: var(--accent); color:#fff; border:none; padding:8px 12px; border-radius:8px; cursor:pointer;
+      
+    }
+   
+    
+
+    /* Top area: overall accuracy full width */
+    .top {
+      margin-top: 14px;
+      margin-bottom: 18px;
+      display:flex;
+      align-items:center;
+      gap: 24px;
+      flex-wrap:wrap;
+      justify-content:center;
+    }
+    .overall-card {
+      background: var(--card);
+      padding: 14px;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      min-width: 280px;
+    }
+    .overall-card h2{ margin:6px 0 12px 0; font-size:16px }
+
+    #overallChart { width: 180px !important; height: 180px !important; }
+
+    /* main two-column area */
+    .main {
+      display: grid;
+      grid-template-columns: 1fr 450px;
+      gap: 30px;
+      align-items:start;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Left: pose list */
+    .pose-list {
+      background: var(--card);
+      padding: 12px;
+      border-radius: 10px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+      max-height: 74vh;
+      overflow: auto;
+    }
+    .section-title { margin: 6px 0 12px 0; font-weight:700; font-size:20px; text-align: center; }
+
+    .pose-card {
+      display:flex;
+      gap:8px;
+      align-items:center;
+      padding:8px;
+      border-radius:8px;
+      margin-bottom:10px;
+      border: 1px solid rgba(0,0,0,0.05);
+      background: #fff;
+    }
+    .pose-card:last-child{ margin-bottom: 0 }
+
+    .thumb {
+      width:150px;
+      height:150px;
+      object-fit:cover;
+      border-radius:6px;
+      border:1px solid #ddd;
+      cursor: pointer;
+      flex-shrink:0;
+      background: #eee;
+      margin-right: 15%;
+    }
+
+    .pose-info {
+      flex:1;
+      min-width:0;
+    }
+    .pose-name { font-weight:700; margin-bottom:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .progress-wrap {
+      height:20px;
+      width: 70%;
+      border-radius:4px;
+      background:#eee;
+      overflow:hidden;
+      border:1px solid #e0e0e0;
+    }
+    .progress-fill {
+      height:100%;
+      width:0%;
+      transition: width 400ms ease;
+      background: green;
+    }
+    .pose-right {
+      width:60px;
+      text-align: center;
+      font-weight:700;
+      font-size:14px;
+      
+    }
+    .insights{
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 20px;
+      text-align: center;
+      font-weight: 700;
+      margin-bottom: 15px;
+    }
+
+    /* Right: suggestions */
+    .suggestions {
+      background: var(--card);
+      padding: 14px;
+      border-radius: 10px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+      position: relative;
+      max-height: 80vh;  /* optional: max height */
+      min-height: 500px;
+      overflow:auto;
+    }
+    .suggestions h3 { margin:0 0 10px 0; font-size:16px; }
+    .suggestions .item { margin-bottom:10px; padding:8px; border-radius:6px; background:#fafafa; border:1px solid #eee;}
+    .suggestions .badge { display:inline-block; padding:4px 8px; border-radius:12px; font-weight:700; background:#f0f0f0; margin-right:6px; }
+
+    .pose-list, .suggestions {
+  overflow-y: auto;
+}
+.suggestions .item {
+  margin-bottom: 15px; /* adds space between each box */
+}
+
+/* optional: remove bottom margin for last item */
+.suggestions .item:last-child {
+  margin-bottom: 0;
+}
+.button-row {
+  display: flex;
+  justify-content: center; /* centers horizontally */
+  gap: 16px;               /* space between buttons */
+  margin: 30px 0;          /* space from content above */
+}
+
+.button-row button {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+    /* modal */
+    .modal {
+      position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.75); z-index:9999;
+    }
+    .modal.open { display:flex; }
+
+    .modal img { max-width:92%; max-height:90%; border-radius:2px; box-shadow:0 10px 40px rgba(0,0,0,0.6);  }
+
+    .modal img.zoomed {
+  transform: scale(3.5); /* 1.5× larger */
+  cursor: zoom-out;
+}
+
+    .modal .close { position:absolute; top:18px; right:22px; color:#fff; font-size:22px; cursor:pointer; padding:6px 10px; background:rgba(0,0,0,0.3); border-radius:6px; }
+
+    /* responsive */
+    @media (max-width:1000px){
+      .main { grid-template-columns: 1fr 320px; }
+    }
+    @media (max-width:780px){
+      .main { grid-template-columns: 1fr; }
+      .suggestions { order: 2; margin-top:10px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Yoga Session Results</h1>
+   
+  </header>
+
+  <div class="top">
+    <div class="overall-card">
+      <h2>Overall Accuracy</h2>
+      <canvas id="overallChart"></canvas>
+      <div id="overallText" style="margin-top:8px;font-weight:700;font-size:18px;"></div>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- LEFT: Pose-wise performance list -->
+    <div class="pose-list">
+      <div class="section-title">Pose-wise Performance</div>
+      <div id="poseContainer">
+        <!-- pose cards will be appended here -->
+      </div>
+    </div>
+
+    <!-- RIGHT: Suggestions and summary -->
+    <aside class="suggestions">
+      <div class="insights">Insights & Suggestions</div>
+      <div id="summaryBlock">
+        <!-- autogenerated content -->
+      </div>
+    </aside>
+  </div>
+
+  <!-- modal for large image -->
+  <div id="imgModal" class="modal" onclick="closeModal(event)">
+    <div class="close" onclick="closeModal(event)">✕</div>
+    <img id="modalImg" src="" alt="pose large"/>
+  </div>
+
+  <div class="button-row">
+  <button onclick="location.href='home.html'">Back to Home</button>
+  <button onclick="clearSession()">Clear</button>
+  <button onclick="downloadReport()">Download PDF</button>
+</div>
+
+
+  
+
+  <!-- html2pdf for download -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+
+  <script>
+  // ---------- Utility helpers ----------
+  function safeParse(v){ try { return JSON.parse(v||'{}'); } catch(e){ return {}; } }
+  function colorFor(val){
+    if(val < 40) return 'red';
+    if(val < 80) return 'blue';
+    return 'green';
+  }
+  function clamp(v, a=0, b=100){ return Math.max(a, Math.min(b, v)); }
+  function avg(arr){ if(!arr || !arr.length) return 0; return arr.reduce((s,x)=>s+x,0)/arr.length; }
+
+  // ---------- Load & normalize results ----------
+  function loadSessionResults(){
+    // sessionResults may be: { poseName: [ numbers ] }  OR { poseName: [ {accuracy,image,ts} ] }
+    const raw = safeParse(sessionStorage.getItem('sessionResults'));
+    const normalized = {}; // { pose: { frames:[{accuracy,image,ts}], avg, bestFrame } }
+    for(const pose of Object.keys(raw||{})){
+      const entries = raw[pose] || [];
+      if(!entries.length) continue;
+      // detect format
+      if(typeof entries[0] === 'number'){
+        // old format: numbers array
+        const frames = entries.map(v => ({ accuracy: clamp(Number(v)||0), image: null, ts: Date.now() }));
+        normalized[pose] = { frames, avg: avg(frames.map(f=>f.accuracy)) };
+      } else {
+        // object format
+        const frames = entries.map(e => ({ accuracy: clamp(Number(e.accuracy)||0), image: e.image || null, ts: e.ts || Date.now() }));
+        normalized[pose] = { frames, avg: avg(frames.map(f=>f.accuracy)) };
+      }
+      // best frame (highest accuracy) for thumbnail
+      const bestFrame = normalized[pose].frames.slice().sort((a,b)=> b.accuracy - a.accuracy)[0] || normalized[pose].frames[0];
+      normalized[pose].best = bestFrame || { accuracy: 0, image: null, ts: Date.now() };
+    }
+    return normalized;
+  }
+
+  // ---------- Render overall chart ----------
+  function renderOverall(posesData){
+    const poses = Object.keys(posesData);
+    const averages = poses.map(p => posesData[p].avg);
+    const overall = averages.length ? avg(averages) : 0;
+
+    const ctx = document.getElementById('overallChart');
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Accuracy', 'Remaining'],
+        datasets: [{ data: [overall, 100-overall], backgroundColor: ['#4caf50','#eee'] }]
+      },
+      options: {
+        cutout: '70%',
+        plugins: { legend: { display:false }, tooltip: { enabled:false } }
+      },
+      plugins: [{
+        id: 'centerText',
+        afterDraw(chart){
+          const { ctx, chartArea:{width, height} } = chart;
+          ctx.save();
+          ctx.font = 'bold 20px Arial';
+          ctx.fillStyle = '#111';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(Math.round(overall) + '%', width/2, height/2);
+          ctx.restore();
+        }
+      }]
+    });
+
+    document.getElementById('overallText').textContent = 'Overall session accuracy: ' + Math.round(overall) + '%';
+    return overall;
+  }
+
+  // ---------- Render pose cards ----------
+  function renderPoseCards(posesData){
+    const container = document.getElementById('poseContainer');
+    container.innerHTML = '';
+    const poses = Object.keys(posesData);
+    if(!poses.length){
+      container.innerHTML = '<div style="padding:12px;color:var(--muted)">No poses recorded in this session.</div>';
+      return;
+    }
+
+    // Sort by avg descending (best first)
+    poses.sort((a,b) => (posesData[b].avg - posesData[a].avg));
+
+    for(const pose of poses){
+      const data = posesData[pose];
+      const pct = Math.round(data.avg || 0);
+      const bestImage = data.best && data.best.image ? data.best.image : '';
+      const card = document.createElement('div'); card.className = 'pose-card';
+
+      const img = document.createElement('img'); img.className='thumb';
+      img.src = bestImage || ''; img.alt = pose + ' thumb';
+      // placeholder if no image
+      if(!bestImage){
+        img.style.background = '#f2f2f2';
+        img.style.display = 'block';
+      }
+      // dblclick to open large
+      img.addEventListener('dblclick', () => { if(bestImage) openModal(bestImage, pose); });
+
+      const info = document.createElement('div'); info.className='pose-info';
+      const name = document.createElement('div'); name.className='pose-name'; name.textContent = pose;
+      const progressWrap = document.createElement('div'); progressWrap.className='progress-wrap';
+      const fill = document.createElement('div'); fill.className='progress-fill';
+      fill.style.width = pct + '%';
+      fill.style.background = colorFor(pct);
+      progressWrap.appendChild(fill);
+
+      info.appendChild(name);
+      info.appendChild(progressWrap);
+
+      const right = document.createElement('div'); right.className='pose-right'; right.textContent = pct + '%';
+
+      card.appendChild(img);
+      card.appendChild(info);
+      card.appendChild(right);
+
+      container.appendChild(card);
+    }
+  }
+
+  // ---------- Suggestions logic (auto-generated) ----------
+  function generateSuggestions(posesData, overall){
+    const poses = Object.keys(posesData);
+    const summary = [];
+    // 1) Best and worst
+    if(poses.length){
+      let best = poses[0], worst = poses[0];
+      for(const p of poses){
+        if(posesData[p].avg > posesData[best].avg) best = p;
+        if(posesData[p].avg < posesData[worst].avg) worst = p;
+      }
+      summary.push({ title: 'Best Pose', text: `${best} — ${Math.round(posesData[best].avg)}%`});
+      summary.push({ title: 'Needs Improvement', text: `${worst} — ${Math.round(posesData[worst].avg)}%`});
+    } else {
+      summary.push({ title:'No poses', text:'No pose data found for this session.'});
+    }
+
+    // 2) Overall performance message
+    let overallMsg = '';
+    if(overall >= 80) overallMsg = 'Excellent session — most poses have good alignment.';
+    else if(overall >= 60) overallMsg = 'Good session — some poses need finer alignment.';
+    else if(overall >= 40) overallMsg = 'Average — practice recommended for several poses.';
+    else overallMsg = 'Poor — focus on fundamentals and alignment.';
+
+    // 3) Per-pose tips for low scores
+    const perTips = [];
+    for(const p of Object.keys(posesData)){
+      const val = posesData[p].avg;
+      if(val < 40){
+        perTips.push(`Work on alignment for ${p} (${Math.round(val)}%). Focus on slow, controlled movement.`);
+      } else if(val < 80){
+        perTips.push(`Improve ${p} posture (${Math.round(val)}%). Check hips/shoulder alignment.`);
+      }
+    }
+
+    return { summary, overallMsg, perTips };
+  }
+
+  function renderSuggestionsBlock(posesData, overall){
+    const root = document.getElementById('summaryBlock');
+    root.innerHTML = '';
+    const { summary, overallMsg, perTips } = generateSuggestions(posesData, overall);
+
+    // Overall message
+    const om = document.createElement('div'); om.className='item';
+    om.innerHTML = `<div style="font-weight:700;margin-bottom:6px">Session Summary</div>
+                    <div style="color:var(--muted)">${overallMsg}</div>`;
+    root.appendChild(om);
+
+    // Best & worst badges
+    summary.forEach(s=>{
+      const el = document.createElement('div'); el.className='item';
+      el.innerHTML = `<div class="badge">${s.title}</div> <strong>${s.text}</strong>`;
+      root.appendChild(el);
+    });
+
+    // Per-pose tips, if any
+    if(perTips.length){
+      const head = document.createElement('div'); head.className='item';
+      head.innerHTML = '<strong>Actionable Tips</strong><div style="color:var(--muted);margin-top:6px">Focus on the following:</div>';
+      root.appendChild(head);
+      perTips.forEach(t => {
+        const el = document.createElement('div'); el.className='item';
+        el.style.background = '#fff8f0';
+        el.innerHTML = `<div style="color:#b45309">${t}</div>`;
+        root.appendChild(el);
+      });
+    } else {
+      const el = document.createElement('div'); el.className='item';
+      el.innerHTML = `<div style="color:green">No specific per-pose warnings — keep practicing!</div>`;
+      root.appendChild(el);
+    }
+
+    // Small stats block
+    const stats = document.createElement('div'); stats.className='item';
+    stats.innerHTML = `<div style="font-weight:700">Quick Stats</div>
+                       <div style="color:var(--muted);margin-top:6px">Total poses: ${Object.keys(posesData).length}</div>`;
+    root.appendChild(stats);
+  }
+
+  // ---------- Modal functions ----------
+  function openModal(src, alt){
+    if(!src) return;
+    const m = document.getElementById('imgModal');
+    const mi = document.getElementById('modalImg');
+    mi.src = src; mi.alt = alt || 'pose';
+    m.classList.add('open');
+  }
+  function closeModal(e){
+    // if clicked on image, ignore (so user can pan/zoom later). If clicked outside or on close, hide modal.
+    if(e && e.target && e.target.id === 'modalImg') return;
+    const m = document.getElementById('imgModal');
+    m.classList.remove('open');
+    document.getElementById('modalImg').src = '';
+  }
+
+  // ---------- Download PDF ----------
+  function downloadReport(){
+    const element = document.body; // you can choose smaller container if desired
+    const opt = { margin: 0.4, filename: 'Yoga_Session_Report.pdf', image: { type:'jpeg', quality:0.95 }, html2canvas: { scale:1.2 }, jsPDF: { unit:'in', format:'a4', orientation:'portrait' } };
+    html2pdf().set(opt).from(element).save();
+  }
+
+  // ---------- Clear session ----------
+  function clearSession(){
+    if(confirm('Clear session data? This will remove stored images and accuracies.')){
+      sessionStorage.removeItem('sessionResults');
+      sessionStorage.removeItem('detectedPose');
+      location.reload();
+    }
+  }
+
+  // ---------- Main render flow ----------
+  function initResultsPage(){
+    const normalized = loadSessionResults();
+    const overall = renderOverall(normalized);
+    renderPoseCards(normalized);
+    renderSuggestionsBlock(normalized, overall);
+  }
+
+  // run on load
+  window.addEventListener('DOMContentLoaded', initResultsPage);
+    const modalImg = document.getElementById('modalImg');
+  modalImg.addEventListener('click', () => {
+    modalImg.classList.toggle('zoomed');
+  });
+  </script>
+</body>
+</html>

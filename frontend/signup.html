@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up - YogaAI</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: url("Yoga images/yo6.jpg") no-repeat center center/cover;
+      background-size: cover;
+      background-attachment: fixed;
+    }
+
+    .center-box {
+      width: 400px;
+      padding: 2.5rem;
+      background: rgba(15, 199, 34, 0.25);
+      backdrop-filter: blur(15px);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+      text-align: center;
+      animation: fadeIn 1s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .logo {
+      width: 90px;
+      height: 90px;
+      margin-bottom: 1rem;
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      border: 3px solid white;
+    }
+
+    h2 {
+      color: #fff;
+      margin-bottom: 1.5rem;
+      font-size: 1.5rem;
+    }
+
+    .input-group {
+      margin-bottom: 1rem;
+      width: 100%;
+    }
+
+    input {
+      width: 93%;
+      padding: 0.8rem;
+      border: 2px solid transparent;
+      border-radius: 10px;
+      outline: none;
+      background: white;
+      font-size: 1rem;
+      color: black;
+      transition: box-shadow 0.3s ease, border 0.3s ease;
+    }
+
+    input:focus {
+      box-shadow: 0 0 8px #154085;
+    }
+
+    input.error {
+      border-color: red;
+    }
+
+    button {
+      width: 95%;
+      padding: 0.8rem;
+      margin-top: 0.5rem;
+      border: none;
+      border-radius: 30px;
+      background: linear-gradient(90deg, #12a73f, #c2e9fb);
+      font-size: 1rem;
+      font-weight: bold;
+      color: black;
+      cursor: pointer;
+      transition: all 0.4s ease;
+    }
+
+    button:disabled {
+      background: gray;
+      cursor: not-allowed;
+    }
+
+    p {
+      margin-top: 1rem;
+      color: rgb(209, 239, 214);
+      font-size: 1rem;
+      text-align: center;
+    }
+
+    a {
+      color: #78b8e0;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 1rem;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* Inline message box for errors and success */
+    #messageBox {
+      margin-top: 1rem;
+      padding: 0.8rem;
+      border-radius: 10px;
+      font-weight: 500;
+      font-size: 0.95rem;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    #messageBox.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="center-box">
+    <img src="Yoga images/yo9.jpg" alt="YogaAI Logo" class="logo">
+    <h2>Create Your Account</h2>
+
+    <div class="input-group">
+      <input id="name" type="text" placeholder="Username" autocomplete="off">
+    </div>
+    <div class="input-group">
+      <input id="email" type="email" placeholder="Email" autocomplete="off">
+    </div>
+    <div class="input-group">
+      <input id="password" type="password" placeholder="Password" autocomplete="new-password">
+    </div>
+
+    <button id="signupBtn">Continue</button>
+    <div id="messageBox"></div>
+    <p>Already have an account? <a href="login.html">Login</a></p>
+  </div>
+
+  <script>
+    const showMessage = (text, type, inputId = null) => {
+      const messageBox = document.getElementById("messageBox");
+      messageBox.textContent = text;
+      messageBox.classList.add("show");
+      messageBox.style.color = type === "success" ? "#0f5132" : "#842029";
+      messageBox.style.backgroundColor = type === "success" ? "rgba(209, 231, 221, 0.9)" : "rgba(248, 215, 218, 0.9)";
+      messageBox.style.border = type === "success" ? "1px solid #badbcc" : "1px solid #f5c2c7";
+
+      // Add red border to input if inputId provided
+      if (inputId) {
+        document.getElementById(inputId).classList.add("error");
+      }
+    };
+
+    const clearMessage = () => {
+      const messageBox = document.getElementById("messageBox");
+      messageBox.textContent = "";
+      messageBox.classList.remove("show");
+
+      // Clear red borders from all inputs
+      document.querySelectorAll("input").forEach(input => input.classList.remove("error"));
+    };
+
+    document.getElementById("signupBtn").addEventListener("click", async () => {
+      clearMessage();
+
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+
+      if (!name) { showMessage("⚠ Username is required", "error", "name"); return; }
+      if (!email) { showMessage("⚠ Email is required", "error", "email"); return; }
+      if (!email.includes("@") || !email.includes(".")) { showMessage("⚠ Enter a valid email", "error", "email"); return; }
+      if (!password) { showMessage("⚠ Password is required", "error", "password"); return; }
+      if (password.length < 8) { showMessage("⚠ Password must be at least 8 characters", "error", "password"); return; }
+
+      try {
+        const res = await fetch("http://localhost:4000/api/auth/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, password })
+        });
+
+        const data = await res.json();
+if (res.ok) {
+        localStorage.setItem("jwtToken", data.token);
+        showMessage("Redirecting to profile setup...", "success");
+
+        // Redirect to signup2.html after 1.5s
+        setTimeout(() => {
+          window.location.href = "signup2.html";
+        }, 1500);
+      } else {
+        showMessage("❌ " + (data.message || "Signup failed"), "error");
+      }
+    } catch (err) {
+      showMessage("⚠ Server error, please try again later", "error");
+    }
+  });
+</script>
+</body>
+</html>

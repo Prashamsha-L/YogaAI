@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YogaAI - Tips & Motivation</title>
+<style>
+    /* General Styles */
+    /* General Styles */
+body {
+    font-family: "Segoe UI", sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background: url("Yoga images/Bg.jpeg") no-repeat center center/cover; /* green-themed background image */
+    color: #0b3d2e;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+/* Overlay for readability */
+body::before {
+    content: "";
+    position: fixed;
+    top:0; left:0;
+    width:150%; height:150%;
+     /* Slightly transparent for green bg visibility */
+    z-index: 0;
+}
+
+
+    /* Back Button */
+    .back-btn {
+        position: relative;
+        z-index: 1;
+        display: inline-block;
+        margin: 30px 0 20px 0;
+        padding: 10px 25px;
+        background: #17650b;
+        color: #fff;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+    .back-btn:hover { background: #092d07; transform: scale(1.05); }
+
+    /* Page Header */
+    .header {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+        padding-bottom: 30px;
+        color:white;
+        text-shadow: 1px 1px 4px rgba(0,0,0,0.3);
+    }
+    .header h1 { font-size: 2.8rem; margin-bottom: 10px; }
+    .header p { font-size: 1.1rem; max-width: 700px; margin: 0 auto; }
+
+    /* Tips Section */
+    .tips-section {
+        position: relative;
+        z-index: 1;
+        max-width: 600px;
+        width: 90%;
+        display: grid;
+        gap: 20px;
+        margin-bottom: 50px;
+    }
+
+.tip-card {
+    background: rgba(148, 222, 125, 0.95); /* translucent white */
+    padding: 20px 25px;
+    border-radius: 15px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    transition: transform 0.3s, box-shadow 0.3s;
+    width: 98%; /* almost full width */
+    max-width: 1200px; /* limit so it doesn’t stretch too much on large screens */
+    margin: 15px auto; /* center card horizontally */
+    display: flex;
+    flex-direction: column; /* stack content vertically */
+    align-items: flex-start; /* content aligned left inside */
+}
+
+.tip-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+}
+
+    .tip-card h3 {
+        margin-bottom: 10px;
+        color: black;
+        font-size: 1.4rem;
+    }
+    .tip-card p {
+        font-size: 1rem;
+        color: black;
+        line-height: 1.6;
+    }
+
+    /* Corner Quote Images */
+    .corner-quote {
+        position: fixed;
+        width: 300px;
+        height: 190px;
+        object-fit: cover;
+        border-radius: 15px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+        z-index: 2;
+    }
+    .top-left { top: 20px; left: 20px; }
+    .top-right { top: 20px; right: 20px; }
+    .bottom-left { bottom: 20px; left: 20px; }
+    .bottom-right { bottom: 20px; right: 20px; }
+
+    /* Responsive */
+    @media(max-width: 768px) {
+        .corner-quote { width: 80px; height: 80px; }
+        .tip-card { padding: 15px 20px; }
+        .header h1 { font-size: 2rem; }
+    }
+</style>
+</head>
+<body>
+
+    <!-- 4 Corner Quotes -->
+    <img src="Yoga images/yo19.jpg" class="corner-quote top-left" alt="Quote 1">
+    <img src="Yoga images/yo20.jpg" class="corner-quote top-right" alt="Quote 2">
+    <img src="Yoga images/m1.jpg" class="corner-quote bottom-left" alt="Quote 3">
+    <img src="Yoga images/yo22.jpg" class="corner-quote bottom-right" alt="Quote 4">
+
+    
+
+    <!-- Header -->
+    <div class="header">
+        <h1>Yoga Tips & Motivation</h1>
+        <p>Enhance your yoga journey with practical tips and daily motivational quotes to keep you inspired.</p>
+    </div>
+
+    <!-- Tips Section -->
+    <div class="tips-section">
+        <div class="tip-card">
+            <h3>Time & Frequency</h3>
+            <p>Best time: Early morning (5–7 AM) on an empty stomach. Evening sessions after work help relax. Duration: 20–60 mins daily; beginners can start with 10–15 mins.</p>
+        </div>
+
+        <div class="tip-card">
+            <h3>Duration & Repetitions</h3>
+            <p>Hold beginner poses 20–30s, intermediate 30–60s, advanced 1–2 mins. Repeat 3–5 rounds for dynamic sequences like Surya Namaskar.</p>
+        </div>
+
+        <div class="tip-card">
+            <h3>Pose Selection</h3>
+            <p>Beginners: Tadasana, Vrikshasana, Balasana. Intermediate: Bhujangasana, Trikonasana, Utkata Konasana. Advanced: Arm balances, inversions, and backbends with supervision.</p>
+        </div>
+
+        <div class="tip-card">
+            <h3>Environment</h3>
+            <p>Practice on clean, flat, non-slippery surface. Use yoga mat. Quiet, ventilated space with natural light if possible.</p>
+        </div>
+
+        <div class="tip-card">
+            <h3>Breathing & Mindfulness</h3>
+            <p>Inhale/exhale deeply through nose. Coordinate breath with movement. Focus mind on pose and avoid distractions.</p>
+        </div>
+
+        <div class="tip-card">
+            <h3>Clothing & Equipment</h3>
+            <p>Wear comfortable, stretchable clothing. Avoid heavy meals 2–3 hrs before practice. Optional: blocks, straps, cushions for support.</p>
+        </div>
+
+        <div class="tip-card">
+            <h3>Progression & Safety</h3>
+            <p>Start slow and listen to your body. Avoid pain. Gradually increase pose difficulty and duration.</p>
+        </div>
+
+        <div class="tip-card">
+            <h3>Hydration & Diet</h3>
+            <p>Drink water after yoga, not during vigorous sessions. Light fruit or smoothie post-session. Avoid heavy meals immediately before practice.</p>
+        </div>
+
+        <div class="tip-card">
+            <h3>Targeted Tips by Goals</h3>
+            <p>Stress relief: restorative poses & pranayama. Weight management: dynamic sequences & twists. Flexibility: standing poses & hip openers. Hormonal health: Utkata Konasana, Setu Bandhasana, twists. Respiratory: Pranayama, Bhujangasana, Matsyasana.</p>
+        </div>
+
+        <div class="tip-card">
+            <h3>Consistency & Tracking</h3>
+            <p>Maintain a yoga journal or app to track daily sessions. Review weekly for strength, flexibility, and calmness improvements.</p>
+        </div>
+    </div>
+    <!-- Back Button -->
+    <a href="index.html" class="back-btn">&larr; Back to Home</a>
+
+</body>
+</html>

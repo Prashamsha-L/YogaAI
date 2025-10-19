@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Yoga Pose Detection</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #000;
+      color: #fff;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .video-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+    }
+     #feedback {
+      margin-top: 15px;
+      color: yellow;
+      font-size: 20px;
+      font-weight: bold;
+      text-align: center;
+     }
+
+    /* ✅ Make video full screen and behind canvas
+    background: rgba(255, 255, 255, 0.7); */
+    video#webcam {
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: 1;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 2;
+    }
+    #top-info {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  z-index: 5;
+}
+
+    #countdown {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.7);  
+        border: 3px solid yellow;       
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        font-weight: bold;
+        color: yellow;
+         position: absolute;
+          bottom: 20px;   
+          right: 20px;    
+          z-index: 3;
+          line-height: 70px;               
+          text-align: center; 
+  }
+
+    #pose-label {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      font-size: 22px;
+      font-weight: bold;
+      color: #007bff;
+      
+      padding: 6px 12px;
+      border-radius: 8px;
+      z-index: 3;
+    }
+    #status-label {
+  position: relative;   /* stays inside #top-info */
+  font-size: 24px;
+  font-weight: bold;
+  color: #fa0707;
+  margin-top: 8px;      /* gap below countdown */
+  text-align: center;
+  white-space: nowrap;   
+}
+  #correction-label {
+  position: absolute;
+  top: 60px;  /* below pose-label */
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 22px;
+  font-weight: bold;
+  color: white;  /* ✅ white corrections */
+  text-align: center;
+  z-index: 4;
+}
+
+    .controls {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      z-index: 3;
+    }
+
+    button {
+      padding: 12px 20px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      opacity: 0.9;
+      transition: transform 0.2s, opacity 0.2s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      opacity: 1;
+    }
+    #timer-container {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 70px;
+  height: 70px;
+  z-index: 3;
+}
+
+#timer-text {
+  position: absolute;
+  top: 50%; 
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 18px;
+  font-weight: bold;
+  color: yellow;
+  text-align: center;
+}
+
+svg circle {
+  fill: none;
+  stroke-width: 4;
+}
+
+#progress-bg {
+  stroke: rgba(255, 255, 0, 0.3); 
+}
+
+#progress-ring {
+  stroke: yellow;
+  stroke-dasharray: 201;  
+  stroke-dashoffset: 201; 
+  transition: stroke 0.3s;
+}
+
+
+#startBtn {
+background-color: #28a745; 
+color: white; 
+}
+#stopBtn  { 
+background-color: #dc3545; 
+color: white; 
+}
+#backBtn  { 
+background-color: #007bff; 
+color: white; 
+}
+  </style>
+</head>
+<body>
+  <div class="video-container">
+    <video id="webcam" autoplay playsinline></video>
+    <canvas id="output_canvas"></canvas>
+
+    <div id="top-info">
+    <div id="countdown" style="display:none;">0:00</div>
+
+    <div id="status-label">Press Start button</div>
+    </div>
+
+    <div id="pose-label" style="font-size:22px; font-weight:bold; margin-bottom:10px; color:white;"></div>
+    <div id="feedback" style="font-size:18px; color:red;"></div>
+
+
+    <div class="controls">
+      <button id="startBtn">Start</button>
+      <button id="stopBtn">Stop</button>
+      <button id="backBtn" onclick="window.location.href='home.html'">Back</button>
+      
+    </div>
+
+    <div id="timer-container">
+  <svg width="70" height="70">
+    <circle id="progress-bg" cx="35" cy="35" r="32"></circle>
+    <circle id="progress-ring" cx="35" cy="35" r="32"></circle>
+  </svg>
+  <div id="timer-text">0:00</div>
+</div>
+
+  </div>
+
+  <!-- MediaPipe scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils"></script>
+  <script src="js/mediapipe-integration.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
+
+
+  <script>
+    let lastAsana = "";
+    const poseLabel = document.getElementById("pose-label");
+    const statusLabel = document.getElementById("status-label");
+    const countdownEl = document.getElementById("countdown");
+    const canvasElement = document.getElementById("output_canvas");
+    const videoElement = document.getElementById("webcam");
+  let camera = null;
+  let timerInterval;
+  let sessionDuration = 30; // default
+  let remainingTime = 0;
+  const beepSound = new Audio("beep.mp3");
+  const timerText = document.getElementById("timer-text");
+const progressRing = document.getElementById("progress-ring");
+const radius = 32;
+const circumference = 2 * Math.PI * radius;
+
+progressRing.style.strokeDasharray = circumference;
+progressRing.style.strokeDashoffset = circumference;
+
+    
+    function stopDetection() {
+    if (camera) {
+      camera.stop();
+    }
+    if (videoElement.srcObject) {
+      videoElement.srcObject.getTracks().forEach(track => track.stop());
+    }
+    clearInterval(timerInterval);
+  }
+  function updateTimer() {
+  let min = Math.floor(remainingTime / 60);
+  let sec = remainingTime % 60;
+  timerText.textContent = `${min}:${sec.toString().padStart(2, '0')}`;
+
+  const offset = circumference - (remainingTime / sessionDuration) * circumference;
+  progressRing.style.strokeDashoffset = offset;
+
+  // Change ring color if < 10 sec
+  if (remainingTime <= 10) {
+    progressRing.style.stroke = "red";
+  } else {
+    progressRing.style.stroke = "yellow";
+  }
+}
+    // Start button
+    document.getElementById("startBtn").addEventListener("click", async () => {
+      let minutesInput = parseInt(prompt("Enter session time in minutes:", "1")) || 1;
+      sessionDuration = minutesInput * 60; 
+      remainingTime = sessionDuration;
+
+      sessionStorage.clear();
+       sessionStorage.setItem("sessionResults", JSON.stringify({}));
+       
+      statusLabel.textContent = "Waiting for detection";
+      statusLabel.style.display = "block";
+
+  // Hide it after 2 seconds
+      setTimeout(() => {
+      statusLabel.style.display = "none";
+  }, 2000);
+
+  
+  updateTimer();
+
+    // statusLabel.style.display = "none";
+    // countdownEl.style.display = "flex";
+
+    // if (!countdownEl) {
+    //   countdownEl = document.createElement("div");
+    //   countdownEl.id = "countdown";
+    //   countdownEl.style.position = "absolute";
+    //   countdownEl.style.top = "20%";
+    //   countdownEl.style.left = "50%";
+    //   countdownEl.style.transform = "translateX(-50%)";
+    //   countdownEl.style.fontSize = "32px";
+    //   countdownEl.style.fontWeight = "bold";
+    //   countdownEl.style.color = "yellow";
+    //   countdownEl.style.zIndex = "5";
+    //   document.body.appendChild(countdownEl);
+    // }
+
+
+
+    // Start timer
+    clearInterval(timerInterval);
+    updateTimer();
+    timerInterval = setInterval(() => {
+      remainingTime--;
+      updateTimer();
+
+
+      if (remainingTime === 5) {
+        beepSound.play();
+      }
+
+      if (remainingTime <= 0) {
+        clearInterval(timerInterval);
+        stopDetection();
+        window.location.href = "result.html";
+      }
+    }, 1000);
+
+
+  // statusLabel.style.display = "none";
+  // statusLabel.textContent = "Waiting for detection";
+  // statusLabel.style.display = "block";
+
+  // -------
+  // poseLabel.style.display = "block";   // ✅ make label visible again
+
+  // setTimeout(() => {
+  //   statusLabel.style.display = "none";
+  // }, 4000);
+  try{
+
+  const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+  videoElement.srcObject = stream;
+
+  if (typeof mpPoseCamera !== "undefined") {
+    camera = new mpPoseCamera(videoElement, {
+      onFrame: async () => { await pose.send({ image: videoElement }); },
+      width: 1280,
+      height: 720
+    });
+    camera.start();
+  }
+} catch (err) {
+    console.error("Webcam access failed:", err);
+  }
+});
+
+
+    // Stop button: save frame + redirect
+    document.getElementById("stopBtn").addEventListener("click", () => {
+          stopDetection();
+     if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+      window.location.href = "result.html"; // Go to result page
+    });
+      
+
+    // Watch pose label updates
+    const observer = new MutationObserver(() => {
+      const text = poseLabel.textContent.replace("Pose: ", "").trim();
+      if (text && text !== "Detecting..." && text !== "Waiting for detection...") {
+        announceAsana(text);
+      }
+    });
+    observer.observe(poseLabel, { childList: true });
+
+    // MediaPipe results callback
+  function onPoseResults(results) {
+  if (!results.poseLandmarks || results.poseLandmarks.length < 25) {
+    poseLabel.textContent = "Full body not visible";
+    return;
+  }
+
+  const detectedPose = "DetectedPoseName"; // Replace with model prediction
+  poseLabel.textContent = `Pose: ${detectedPose}`;
+}
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - YogaAI</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: url("Yoga images/yo6.jpg") no-repeat center center/cover;
+      background-attachment: fixed;
+    }
+
+    .center-box {
+      width: 350px;
+      padding: 2.5rem;
+      background: rgba(15, 199, 34, 0.25);
+      backdrop-filter: blur(15px);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(12, 2, 2, 0.15);
+      text-align: center;
+      animation: fadeIn 1s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .logo {
+      width: 100px;
+      margin-bottom: 1rem;
+      border-radius: 50%;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    h2 {
+      color: #fff;
+      margin-bottom: 1.5rem;
+      font-size: 1.5rem;
+    }
+
+    .input-group {
+      margin-bottom: 0.8rem;
+      width: 100%;
+    }
+
+    input {
+      width: 90%;
+      padding: 0.8rem;
+      border: none;
+      border-radius: 10px;
+      outline: none;
+      background: white;
+      font-size: 1rem;
+    }
+
+    input:focus {
+      box-shadow: 0 0 8px #74c69d;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.8rem;
+      border: none;
+      border-radius: 30px;
+      background: linear-gradient(90deg, #18a342, #c2e9fb);
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      background: linear-gradient(135deg, #0e8f35, #6cd4ff);
+      transform: scale(1.05);
+    }
+
+    button:disabled {
+      background: gray;
+      cursor: not-allowed;
+    }
+
+    p {
+      margin-top: 1rem;
+      color: rgb(246, 242, 242);
+    }
+
+    a {
+      color: rgb(120, 184, 224);
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    #messageBox {
+      margin-top: 1rem;
+      padding: 0.8rem;
+      border-radius: 10px;
+      font-weight: 500;
+      font-size: 0.95rem;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    #messageBox.show {
+      opacity: 1;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="center-box">
+    <img src="Yoga images/yo9.jpg" alt="YogaAI Logo" class="logo">
+    <h2>Login to YogaAI</h2>
+
+    <div class="input-group">
+      <input id="email" type="email" placeholder="Email" autocomplete="off">
+    </div>
+    <div class="input-group">
+      <input id="password" type="password" placeholder="Password" autocomplete="new-password">
+    </div>
+
+    <button id="loginBtn">Login</button>
+
+    <div id="messageBox"></div>
+
+    <p>Don't have an account? <a href="signup.html">Sign Up</a></p>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const email = document.getElementById("email");
+      const password = document.getElementById("password");
+      const loginBtn = document.getElementById("loginBtn");
+      const messageBox = document.getElementById("messageBox");
+
+      // Function to show message inside page
+      function showMessage(text, type) {
+        messageBox.textContent = text;
+        messageBox.classList.add("show");
+        messageBox.style.color = type === "success" ? "#0f5132" : "#842029";
+        messageBox.style.backgroundColor = type === "success" ? "rgba(209, 231, 221, 0.9)" : "rgba(248, 215, 218, 0.9)";
+        messageBox.style.border = type === "success" ? "1px solid #badbcc" : "1px solid #f5c2c7";
+      }
+
+      loginBtn.addEventListener("click", async (e) => {
+        e.preventDefault();
+
+        const emailValue = email.value.trim();
+        const passwordValue = password.value.trim();
+
+        // Specific field validations
+        if (!emailValue && !passwordValue) {
+          showMessage("⚠ Please enter both email and password", "error");
+          return;
+        }
+        if (!emailValue && passwordValue) {
+          showMessage("⚠ Please enter your email", "error");
+          return;
+        }
+        if (!emailValue.includes("@") || !emailValue.includes(".")) {
+          showMessage("⚠ Please enter a valid email address", "error");
+          return;
+        }
+
+        if (emailValue && !passwordValue) {
+          showMessage("⚠ Please enter your password", "error");
+          return;
+        }
+
+        try {
+          const res = await fetch("http://localhost:4000/api/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: emailValue, password: passwordValue }),
+          });
+
+          const data = await res.json();
+
+          if (res.ok && data.token) {
+            localStorage.setItem("jwtToken", data.token);
+            showMessage("✅ Login successful! Redirecting...", "success");
+            setTimeout(() => {
+              window.location.href = "home.html";
+            }, 1500);
+          } else {
+            showMessage(data.message || "❌ Invalid email or password", "error");
+          }
+        } catch (error) {
+          showMessage("⚠ Network error. Please try again later.", "error");
+        } finally {
+          loginBtn.disabled = false;
+          loginBtn.textContent = "Login";
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YogaAI — Yoga Poses Library</title>
+<style>
+body {
+  margin: 0;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  background: 
+    
+    url("yoga images/Bg.jpeg") no-repeat center center fixed;
+  background-size: cover;
+  color: #333;
+}
+
+
+/* Navbar */
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(8px);
+    padding: 12px 30px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.logo { 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    font-weight: bold; 
+    color: #035620; 
+    font-size: 1.5rem; 
+}
+.logo img { 
+    height: 50px; 
+    width: 50px; 
+    border-radius: 50%; 
+    object-fit: cover; 
+    box-shadow: 0 3px 8px rgba(0,0,0,0.3); 
+}
+
+nav ul { 
+    list-style: none; 
+    display: flex; 
+    gap: 20px; 
+    margin: 0; 
+    padding: 0; 
+}
+
+nav ul li a {
+    text-decoration: none;
+    color: #000;
+    font-weight: bold;
+    font-size: 1rem;
+    position: relative;
+    padding: 4px 0;
+}
+
+/* Underline hover effect */
+nav ul li a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 0%;
+    height: 2px;
+    background: #035620;
+    transition: width 0.3s ease;
+}
+
+nav ul li a:hover::after {
+    width: 100%;
+}
+
+/* Active link stays underlined */
+nav ul li a.active::after {
+    width: 100%;
+}
+
+h1{text-align:center;color:white;margin-bottom:20px;}
+.difficulty-boxes{
+  display:flex;
+  justify-content: center;
+  gap:15px;
+  margin-bottom:30px;
+  flex-wrap: wrap;
+}
+.difficulty-box{
+  padding:15px 25px;
+  border-radius:10px;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+  transition: transform 0.2s;
+}
+.difficulty-box:hover{transform: scale(1.05);}
+.beginner-box{background:#134906;}
+.intermediate-box{background:#8c870a;color:#333;}
+.advanced-box{background:#dc3545;}
+.pose-section{display:none;}
+
+
+/* Header */
+header {
+  text-align: center;
+  padding: 25px 15px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+header h1 {
+  font-size: 2.2rem;
+  color: #00695c;
+  margin: 0;
+}
+
+header p {
+  font-size: 1rem;
+  color: #555;
+  margin: 8px 0 0;
+}
+
+/* Difficulty selection */
+.difficulty-selection {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  margin: 25px 0;
+  flex-wrap: wrap;
+}
+
+.difficulty-box {
+  padding: 18px 28px;
+  border-radius: 14px;
+  font-weight: bold;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color:white;
+  transition: transform 0.3s, box-shadow 0.3s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.difficulty-box:hover {
+  transform: translateY(-6px) scale(1.05);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+}
+
+#beginner { background: linear-gradient(135deg, #2123a5, #c45c16); }
+#intermediate { background: linear-gradient(135deg, #64b5f6, #1e88e5); }
+#advanced { background: linear-gradient(135deg, #ff8a65, #e53935); }
+
+/* Pose Sections */
+.pose-section {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 25px;
+}
+
+.pose-section h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  color: #37474f;
+  font-size: 1.8rem;
+}
+
+/* Pose Cards */
+.pose-card {
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 18px;
+  margin: 20px 0;
+  padding: 18px 22px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.pose-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+}
+
+.pose-card h3 {
+  margin: 0;
+  color: #0a4b0e;
+  font-size: 1.2rem;
+}
+
+/* Pose info accordion */
+.pose-info {
+  display: none;
+  margin-top: 12px;
+  border-top: 1px solid #ddd;
+  padding-top: 12px;
+  animation: expand 0.3s ease;
+
+  /* side-by-side layout */
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.pose-info.active {
+  display: flex;   /* flex only when active */
+}
+
+.pose-info img {
+  max-width: 260px;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  flex-shrink: 0;  /* don’t shrink */
+}
+
+.pose-info-content {
+  flex: 1;   /* let text expand */
+}
+
+.pose-info h4 {
+  margin: 10px 0 6px;
+  color: #444;
+}
+
+.pose-info ol,
+.pose-info ul {
+  margin: 0 0 12px 20px;
+  padding: 0;
+  color: #555;
+  font-size: 1rem;
+}
+
+/* 📱 Responsive: stack on mobile */
+@media (max-width: 800px) {
+  .pose-info {
+    flex-direction: column;
+    align-items: center;
+    text-align: left;
+  }
+
+  .pose-info img {
+    max-width: 100%;
+  }
+}
+
+
+/* Search bar */
+  .search-container {
+    text-align: center;
+    margin-bottom: 20px;
+    margin-top: 30px;
+  }
+
+  .search-container input {
+    padding: 20px;
+    width: 450px;
+    border-radius: 5px;
+    border: 1px solid #00695c;
+  }
+
+  .search-container button {
+    padding: 20px 20px;
+    border: none;
+    background-color: #137a1a;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1 em;
+  }
+      .search-container button:hover { background: #08360b; transform: scale(1.05); }
+
+
+
+</style>
+</head>
+<body>
+
+  <!-- Navigation -->
+    <nav>
+  <div class="logo">
+    <img src="Yoga images/yo9.jpg" alt="YogaAI Logo">
+    <span>YogaAI</span>
+  </div>
+  <ul>
+    <li><a href="home.html">Home</a></li>
+    <li><a href="posture.html">Posture Detection</a></li>
+    <li><a href="tutorials.html">Tutorials</a></li>
+    <li><a href="library.html">Library</a></li>
+    <li><a href="calorie.html">Calorie</a></li>
+    <li><a href="diseas.html">Disease Info</a></li> <!-- ✅ fixed -->
+    <li><a href="about.html">About Us</a></li>
+    <li><a href="contact.html">Contact</a></li>
+    <li><a href="index.html">Logout</a></li>
+  </ul>
+</nav>
+
+    
+<div class="container">
+  <h1>Yoga Pose Library</h1>
+  <!-- Search Bar -->
+<div class="search-container">
+  <input type="text" id="searchInput" placeholder="Search for a pose...">
+  <button onclick="searchPose()">Search</button>
+</div>
+
+
+  <div class="difficulty-boxes">
+    <div class="difficulty-box beginner-box" data-target="beginner-section">Beginner</div>
+    <div class="difficulty-box intermediate-box" data-target="intermediate-section">Intermediate</div>
+    <div class="difficulty-box advanced-box" data-target="advanced-section">Advanced</div>
+  </div>
+
+  <div class="pose-section" id="beginner-section"></div>
+  <div class="pose-section" id="intermediate-section"></div>
+  <div class="pose-section" id="advanced-section"></div>
+</div>
+
+<script>
+  
+// 18 Beginner Poses with Steps + Disease-Specific Benefits
+const beginnerPoses = [
+  {
+    name: "Adho Mukha Svanasana (Downward Dog Pose)",
+    img: "Yoga images/b1.jpeg",
+    steps: [
+      "Start on hands and knees, wrists under shoulders, knees under hips.",
+      "Spread fingers wide and press palms firmly into the mat.",
+      "Exhale, lift knees off the floor, straighten legs, and lift hips forming an inverted V.",
+      "Keep head aligned with arms, look between your legs.",
+      "Hold for 30–60 seconds, then release."
+    ],
+    benefits: [
+      "Stretches and strengthens spine, hamstrings, and calves.",
+      "Relieves back, neck, and shoulder pain.",
+      "Improves digestion and stimulates abdominal organs.",
+      "Reduces stress, anxiety, and mild depression.",
+      "Boosts immunity and blood circulation.",
+      "Helps with insomnia and fatigue.",
+      "May relieve headaches and mild migraines."
+    ]
+  },
+  {
+    name: "Ananda Balasana (Happy Baby Pose)",
+    img: "Yoga images/b2.jpeg",
+    steps: [
+      "Lie on your back, arms at sides.",
+      "Bend knees and bring them toward armpits.",
+      "Hold the outer edges of your feet with hands.",
+      "Keep back flat on the floor.",
+      "Rock gently side to side."
+    ],
+    benefits: [
+      "Opens hips and groin.",
+      "Relieves lower back pain and sciatica.",
+      "Reduces stress, anxiety, and mild depression.",
+      "Stimulates digestive organs, reduces constipation and bloating.",
+      "Improves flexibility in knees and hips.",
+      "Helps with menstrual cramps and discomfort."
+    ]
+  },
+  {
+    name: "Anjaneyasana (Low Lunge Pose)",
+    img: "Yoga images/b3.jpeg",
+    steps: [
+      "Step right leg forward into a lunge, left knee on the floor.",
+      "Align front knee above ankle.",
+      "Stretch arms overhead, palms facing each other.",
+      "Keep hips squared forward.",
+      "Hold 20–30 seconds, then switch legs."
+    ],
+    benefits: [
+      "Stretches hip flexors, thighs, and glutes.",
+      "Strengthens legs, hips, and core muscles.",
+      "Improves posture, balance, and flexibility.",
+      "Opens chest and lungs for better breathing.",
+      "Helps reduce lower back and knee pain.",
+      "Boosts circulation and metabolism.",
+      "Relieves mild asthma and respiratory discomfort."
+    ]
+  },
+  {
+    name: "Ardha Chakrasana (Half Wheel Pose)",
+    img: "Yoga images/b4.jpeg",
+    steps: [
+      "Stand straight, feet hip-width apart.",
+      "Place hands on waist.",
+      "Inhale, gently lean back lifting chest and head.",
+      "Keep thighs firm and feet grounded.",
+      "Hold 15–30 seconds, exhale and return."
+    ],
+    benefits: [
+      "Strengthens spine, back, and shoulder muscles.",
+      "Improves flexibility of chest, shoulders, and spine.",
+      "Stimulates abdominal organs and digestive system.",
+      "Reduces fatigue, stress, and mild depression.",
+      "Helps improve posture and relieve spinal stiffness.",
+      "Opens chest, aiding respiratory health."
+    ]
+  },
+  {
+    name: "Ardha Uttanasana (Half Forward Bend)",
+    img: "Yoga images/b5.jpeg",
+    steps: [
+      "Stand straight, feet together.",
+      "Exhale, bend forward from hips keeping back straight.",
+      "Place hands on shins or fingertips on floor.",
+      "Look forward, not down.",
+      "Hold 15–30 seconds, then slowly rise."
+    ],
+    benefits: [
+      "Stretches hamstrings, calves, and spine.",
+      "Strengthens back muscles.",
+      "Improves digestion and relieves constipation.",
+      "Reduces fatigue and mental stress.",
+      "Helps relieve headaches and mild insomnia.",
+      "Improves blood circulation and oxygen supply."
+    ]
+  },
+  {
+    name: "Baddha Konasana (Bound Angle Pose / Butterfly)",
+    img: "Yoga images/b6.jpeg",
+    steps: [
+      "Sit on floor, soles of feet together.",
+      "Hold feet with hands, pull heels close to pelvis.",
+      "Keep back straight.",
+      "Gently press knees toward floor.",
+      "Hold 30–60 seconds."
+    ],
+    benefits: [
+      "Opens hips, groin, and thighs.",
+      "Relieves menstrual discomfort and cramps.",
+      "Stimulates digestive organs and improves metabolism.",
+      "Reduces fatigue, anxiety, and stress.",
+      "Helps relieve mild hip, knee, and lower back pain.",
+      "Improves reproductive health and fertility."
+    ]
+  },
+  {
+    name: "Balasana (Child’s Pose)",
+    img: "Yoga images/b7.jpeg",
+    steps: [
+      "Kneel, sit on heels.",
+      "Bend forward, forehead on floor.",
+      "Stretch arms forward or alongside body.",
+      "Relax shoulders, jaw, and back.",
+      "Hold 30–60 seconds."
+    ],
+    benefits: [
+      "Relieves back, neck, and shoulder pain.",
+      "Stretches hips, thighs, and ankles gently.",
+      "Calms mind, reduces stress and anxiety.",
+      "Improves digestion and relieves constipation.",
+      "Helps with mild insomnia.",
+      "Reduces fatigue and improves relaxation."
+    ]
+  },
+  {
+    name: "Bhujangasana (Cobra Pose)",
+    img: "Yoga images/b8.jpeg",
+    steps: [
+      "Lie face down, legs together, palms under shoulders.",
+      "Inhale, lift chest using back muscles, elbows slightly bent.",
+      "Roll shoulders back, open chest, look slightly upward.",
+      "Hold 15–30 seconds, then exhale and lower."
+    ],
+    benefits: [
+      "Strengthens spine, back, and shoulder muscles.",
+      "Opens chest and lungs, improving breathing.",
+      "Stimulates digestive organs and improves metabolism.",
+      "Reduces fatigue, stress, and mild depression.",
+      "Helps relieve asthma, respiratory issues, and sciatica.",
+      "Improves posture and spinal flexibility."
+    ]
+  },
+  {
+    name: "Bitilasana (Cow Pose)",
+    img: "Yoga images/b9.jpeg",
+    steps: [
+      "Start on hands and knees, wrists under shoulders, knees under hips.",
+      "Inhale, drop belly toward floor, lift head and tailbone.",
+      "Keep spine arched naturally.",
+      "Alternate with Cat Pose.",
+      "Repeat 5–10 times."
+    ],
+    benefits: [
+      "Stretches spine, neck, and torso.",
+      "Reduces back stiffness and improves posture.",
+      "Stimulates abdominal organs and digestion.",
+      "Relieves mild stress and fatigue.",
+      "Improves blood circulation."
+    ]
+  },
+  {
+    name: "Dandasana (Staff Pose)",
+    img: "Yoga images/b10.jpeg",
+    steps: [
+      "Sit with legs extended forward.",
+      "Flex feet, toes pointing upward.",
+      "Keep spine straight, hands on floor beside hips.",
+      "Lift chest, relax shoulders.",
+      "Hold 30–60 seconds."
+    ],
+    benefits: [
+      "Strengthens back and core muscles.",
+      "Improves posture and spinal alignment.",
+      "Stretches shoulders and chest.",
+      "Enhances flexibility of legs and hips.",
+      "Calms the mind and improves focus."
+    ]
+  },
+  {
+    name: "Marjariasana (Cat Pose)",
+    img: "Yoga images/b11.jpeg",
+    steps: [
+      "Start on hands and knees in tabletop position.",
+      "Exhale, round spine upward, tucking chin to chest.",
+      "Press hands firmly into the mat.",
+      "Hold briefly, then release.",
+      "Alternate with Cow Pose."
+    ],
+    benefits: [
+      "Stretches back, neck, and shoulders.",
+      "Relieves back and neck pain.",
+      "Improves spinal flexibility.",
+      "Massages abdominal organs, aiding digestion.",
+      "Reduces stress and calms the mind."
+    ]
+  },
+  {
+    name: "Paripurna Navasana (Full Boat Pose)",
+    img: "Yoga images/b12.jpeg",
+    steps: [
+      "Sit with knees bent, feet on floor.",
+      "Lean back slightly, lift feet off floor, shins parallel.",
+      "Straighten legs to form a V-shape.",
+      "Stretch arms forward, palms facing each other.",
+      "Hold 15–30 seconds."
+    ],
+    benefits: [
+      "Strengthens core, hip flexors, and spine.",
+      "Improves balance and stability.",
+      "Stimulates kidneys, thyroid, and intestines.",
+      "Helps relieve stress and improves concentration.",
+      "Boosts digestion and metabolism."
+    ]
+  },
+  {
+    name: "Tadasana Samasthiti (Mountain Pose)",
+    img: "Yoga images/b13.jpeg",
+    steps: [
+      "Stand tall with feet together.",
+      "Arms at sides, palms facing forward.",
+      "Engage core and lift chest.",
+      "Distribute weight evenly on both feet.",
+      "Hold 30–60 seconds."
+    ],
+    benefits: [
+      "Improves posture and balance.",
+      "Strengthens legs and core.",
+      "Calms the mind and reduces anxiety.",
+      "Enhances body awareness.",
+      "Relieves sciatica and reduces flat feet."
+    ]
+  },
+  {
+    name: "Tadasana Urdhva Baddha Hastasana (Raised Hands Mountain Pose)",
+    img: "Yoga images/b14.jpeg",
+    steps: [
+      "Stand tall in Mountain Pose.",
+      "Inhale, raise arms overhead and interlace fingers.",
+      "Turn palms upward, stretching arms and torso.",
+      "Keep spine straight, gaze forward.",
+      "Hold 20–30 seconds."
+    ],
+    benefits: [
+      "Stretches shoulders, arms, and torso.",
+      "Improves posture and balance.",
+      "Relieves fatigue and tension.",
+      "Energizes the body and reduces anxiety."
+    ]
+  },
+  {
+    name: "Tadasana Urdhva Hastasana (Upward Mountain Pose)",
+    img: "Yoga images/b15.jpeg",
+    steps: [
+      "Stand tall in Mountain Pose.",
+      "Inhale, stretch arms overhead, palms facing each other.",
+      "Lift through ribcage and spine.",
+      "Keep shoulders relaxed and grounded.",
+      "Hold 20–30 seconds."
+    ],
+    benefits: [
+      "Improves spinal flexibility.",
+      "Strengthens arms and shoulders.",
+      "Opens chest and improves breathing.",
+      "Reduces fatigue and calms the mind."
+    ]
+  },
+  {
+    name: "Utthita Hasta Padasana (Extended Hand to Foot Pose)",
+    img: "Yoga images/b17.jpeg",
+    steps: [
+      "Stand straight, feet together.",
+      "Lift right leg and hold big toe with right hand.",
+      "Extend leg forward or to the side.",
+      "Keep spine tall and gaze forward.",
+      "Hold 20–30 seconds, switch sides."
+    ],
+    benefits: [
+      "Improves balance and focus.",
+      "Strengthens legs and core.",
+      "Stretches hamstrings and hips.",
+      "Reduces anxiety and stress."
+    ]
+  },
+  {
+    name: "Utthita Trikonasana (Extended Triangle Pose)",
+    img: "Yoga images/b18.jpeg",
+    steps: [
+      "Stand with feet wide apart.",
+      "Turn right foot out, left foot slightly in.",
+      "Stretch arms out to sides.",
+      "Exhale, bend right hand to ankle/floor, left arm up.",
+      "Hold 20–30 seconds, switch sides."
+    ],
+    benefits: [
+      "Stretches legs, hips, and spine.",
+      "Opens chest and shoulders.",
+      "Stimulates abdominal organs and improves digestion.",
+      "Relieves stress, anxiety, and backache.",
+      "Helps with sciatica."
+    ]
+  },
+  {
+    name: "Vajrasana (Thunderbolt Pose)",
+    img: "Yoga images/b19.jpeg",
+    steps: [
+      "Kneel on mat, big toes touching, heels apart.",
+      "Sit back on heels, spine straight.",
+      "Rest palms on thighs.",
+      "Close eyes, breathe deeply.",
+      "Hold 1–5 minutes."
+    ],
+    benefits: [
+      "Improves digestion, relieves acidity and constipation.",
+      "Strengthens pelvic muscles.",
+      "Relieves knee and ankle pain when practiced carefully.",
+      "Calms mind, reduces stress and anxiety.",
+      "Improves blood circulation."
+    ]
+  },
+  {
+    name: "Virabhadrasana I (Warrior I Pose)",
+    img: "Yoga images/b20.jpeg",
+    steps: [
+      "Stand with feet wide apart.",
+      "Turn right foot forward, left foot slightly in.",
+      "Bend right knee over ankle.",
+      "Inhale, raise arms overhead, palms facing.",
+      "Hold 20–30 seconds, switch sides."
+    ],
+    benefits: [
+      "Strengthens legs, arms, and back.",
+      "Improves balance and stability.",
+      "Stretches chest, lungs, and shoulders.",
+      "Boosts stamina and focus.",
+      "Relieves backaches and sciatica."
+    ]
+  },
+  {
+    name: "Virabhadrasana II (Warrior II Pose)",
+    img: "Yoga images/b21.jpeg",
+    steps: [
+      "Stand with feet wide apart.",
+      "Turn right foot forward, left foot slightly in.",
+      "Bend right knee over ankle.",
+      "Stretch arms out parallel to floor.",
+      "Gaze over right hand, hold 20–30 seconds."
+    ],
+    benefits: [
+      "Strengthens legs, hips, and core.",
+      "Opens chest and shoulders.",
+      "Improves stamina and endurance.",
+      "Relieves back stiffness.",
+      "Enhances concentration and mental focus."
+    ]
+  }
+];
+
+
+
+// Intermediate Poses
+const intermediatePoses = [
+  {
+    name: "Anantasana (Side Reclining Leg Lift)",
+    img: "Yoga images/i1.jpeg",
+    steps: [
+      "Lie on your right side, right arm under head for support.",
+      "Place left hand on hip or floor for balance.",
+      "Inhale, lift left leg up as high as comfortable.",
+      "Keep body straight, hold 10–20 seconds, then lower.",
+      "Repeat on other side."
+    ],
+    benefits: [
+      "Strengthens hips, thighs, and core muscles.",
+      "Improves balance and flexibility.",
+      "Stimulates kidneys and abdominal organs.",
+      "Helps relieve sciatica, lower back pain, and hip stiffness.",
+      "Improves digestion and metabolism."
+    ]
+  },
+  {
+    name: "Ardha Chandrasana (Half Moon Pose)",
+    img: "Yoga images/i2.jpeg",
+    steps: [
+      "Stand in Triangle Pose.",
+      "Shift weight to right foot, lift left leg parallel to floor.",
+      "Extend right hand toward floor and left hand upward.",
+      "Look up toward raised hand, hold 20–30 seconds, then switch sides."
+    ],
+    benefits: [
+      "Strengthens legs, ankles, and core.",
+      "Improves balance and posture.",
+      "Opens chest and lungs for better respiration.",
+      "Reduces stress and mild depression.",
+      "Relieves sciatica and lower back pain."
+    ]
+  },
+  {
+    name: "Ardha Matsyendrasana (Half Spinal Twist)",
+    img: "Yoga images/i3.jpeg",
+    steps: [
+      "Sit with legs extended.",
+      "Bend right knee, place foot outside left thigh.",
+      "Keep left leg straight or bent.",
+      "Place right hand behind, left elbow outside right knee.",
+      "Inhale, lengthen spine; exhale, twist to right. Hold 20–30 seconds, switch sides."
+    ],
+    benefits: [
+      "Improves spinal flexibility.",
+      "Stimulates liver, kidneys, and digestive organs.",
+      "Relieves constipation and bloating.",
+      "Reduces back pain and stiffness.",
+      "Improves posture and circulation."
+    ]
+  },
+  {
+    name: "Dhanurasana (Bow Pose)",
+    img: "Yoga images/i4.jpeg",
+    steps: [
+      "Lie face down, bend knees, hold ankles with hands.",
+      "Inhale, lift chest and thighs off the floor.",
+      "Keep gaze forward, hold 15–30 seconds, exhale and release."
+    ],
+    benefits: [
+      "Strengthens back, legs, and core.",
+      "Opens chest and lungs for better breathing.",
+      "Stimulates abdominal organs improving digestion.",
+      "Reduces stress, fatigue, and mild depression.",
+      "Relieves constipation, menstrual discomfort, and mild sciatica."
+    ]
+  },
+  {
+    name: "Malasana (Garland Pose)",
+    img: "Yoga images/i5.jpeg",
+    steps: [
+      "Stand with feet wider than hip-width.",
+      "Squat deeply, keeping heels on floor.",
+      "Bring palms together at chest, elbows pressing knees outward.",
+      "Keep back straight, hold 30–60 seconds."
+    ],
+    benefits: [
+      "Opens hips, groin, and ankles.",
+      "Improves digestion and relieves constipation.",
+      "Reduces lower back and knee pain.",
+      "Stimulates reproductive organs and relieves menstrual discomfort.",
+      "Enhances balance and focus."
+    ]
+  },
+  {
+    name: "Natarajasana (Dancer Pose)",
+    img: "Yoga images/i6.jpeg",
+    steps: [
+      "Stand tall, shift weight to right leg.",
+      "Bend left knee, hold left ankle with left hand.",
+      "Extend right arm forward, lean torso slightly forward.",
+      "Raise left leg back, hold 15–30 seconds, switch sides."
+    ],
+    benefits: [
+      "Strengthens legs, thighs, ankles, and core.",
+      "Improves balance and coordination.",
+      "Opens chest and shoulders, improving respiration.",
+      "Reduces stress and mild anxiety.",
+      "Helps relieve sciatica and lower back stiffness."
+    ]
+  },
+  {
+    name: "Padmasana (Lotus Pose)",
+    img: "Yoga images/i7.jpeg",
+    steps: [
+      "Sit with legs extended.",
+      "Bend right knee, place foot on left thigh.",
+      "Bend left knee, place foot on right thigh.",
+      "Keep spine straight, hands on knees, palms upward.",
+      "Close eyes, breathe deeply, hold 2–5 minutes."
+    ],
+    benefits: [
+      "Opens hips and strengthens spine.",
+      "Calms mind, reduces stress, anxiety, and insomnia.",
+      "Improves digestion and relieves constipation.",
+      "Stimulates reproductive organs.",
+      "Enhances meditation and mental focus."
+    ]
+  },
+  {
+    name: "Parighasana (Gate Pose)",
+    img: "Yoga images/i8.jpeg",
+    steps: [
+      "Kneel on floor, extend right leg sideways.",
+      "Inhale, stretch arms out, exhale, lean right over extended leg.",
+      "Keep left knee grounded, look up at left hand.",
+      "Hold 20–30 seconds, switch sides."
+    ],
+    benefits: [
+      "Stretches sides of torso, spine, and hips.",
+      "Improves flexibility of waist and shoulders.",
+      "Stimulates liver, kidneys, and abdominal organs.",
+      "Relieves mild back pain and sciatica.",
+      "Enhances breathing and lung capacity."
+    ]
+  },
+  {
+    name: "Parivritta Trikonasana (Revolved Triangle Pose)",
+    img: "Yoga images/i9.jpeg",
+    steps: [
+      "Stand wide, extend arms sideways.",
+      "Step right foot forward, hinge at hip, twist torso to left.",
+      "Place right hand outside left foot or on floor, left arm upward.",
+      "Look at left hand, hold 20–30 seconds, switch sides."
+    ],
+    benefits: [
+      "Strengthens legs and core muscles.",
+      "Improves spinal flexibility and digestion.",
+      "Stimulates liver, kidneys, and abdominal organs.",
+      "Reduces back pain and mild obesity.",
+      "Improves balance and posture."
+    ]
+  },
+  {
+    name: "Phalakasana (Plank Pose)",
+    img: "Yoga images/i10.jpeg",
+    steps: [
+      "Start on hands and knees.",
+      "Extend legs back, body straight from head to heels.",
+      "Hands under shoulders, engage core.",
+      "Hold 20–60 seconds, breathing steadily."
+    ],
+    benefits: [
+      "Strengthens core, arms, shoulders, and spine.",
+      "Improves posture and stability.",
+      "Reduces back pain.",
+      "Boosts metabolism and stamina.",
+      "Helps with obesity and fatigue."
+    ]
+  },
+  {
+    name: "Setu Bandha Sarvangasana (Bridge Pose)",
+    img: "Yoga images/i11.jpeg",
+    steps: [
+      "Lie on your back with knees bent, feet hip-width apart.",
+      "Press feet and arms into the mat, lift hips upward.",
+      "Interlace fingers under the back and press shoulders down.",
+      "Hold 15–30 seconds, breathing steadily."
+    ],
+    benefits: [
+      "Strengthens glutes, legs, and back.",
+      "Opens chest, shoulders, and hip flexors.",
+      "Improves spinal flexibility.",
+      "Reduces stress and mild depression.",
+      "Stimulates lungs and thyroid gland."
+    ]
+  },
+  {
+    name: "Utkatasana (Chair Pose)",
+    img: "Yoga images/i12.jpeg",
+    steps: [
+      "Stand tall with feet together.",
+      "Inhale, raise arms overhead, palms facing inward.",
+      "Exhale, bend knees and lower hips as if sitting in a chair.",
+      "Keep spine straight and weight in heels.",
+      "Hold 15–30 seconds."
+    ],
+    benefits: [
+      "Strengthens thighs, calves, and spine.",
+      "Improves balance and stability.",
+      "Stimulates heart, diaphragm, and abdominal organs.",
+      "Builds stamina and endurance."
+    ]
+  },
+  {
+    name: "Utkata Konasana (Goddess Pose)",
+    img: "Yoga images/i13.jpeg",
+    steps: [
+      "Stand with feet wide apart, toes turned out.",
+      "Bend knees deeply, lowering hips toward floor.",
+      "Raise arms to shoulder level, elbows bent, palms facing forward.",
+      "Hold 20–30 seconds, breathing deeply."
+    ],
+    benefits: [
+      "Strengthens legs, glutes, and core.",
+      "Opens hips, chest, and shoulders.",
+      "Improves circulation and stability.",
+      "Boosts stamina and endurance."
+    ]
+  },
+  {
+    name: "Urdhva Dhanurasana (Upward Bow / Wheel Pose)",
+    img: "Yoga images/i14.jpeg",
+    steps: [
+      "Lie on your back, bend knees, place feet on floor hip-width apart.",
+      "Place palms beside ears, fingers pointing toward shoulders.",
+      "Inhale, press into hands and feet, lifting hips and chest upward.",
+      "Straighten arms and legs as much as possible.",
+      "Hold 5–10 breaths, then slowly lower down."
+    ],
+    benefits: [
+      "Strengthens arms, legs, abdomen, and spine.",
+      "Improves flexibility of chest, lungs, and shoulders.",
+      "Energizes the body and combats fatigue.",
+      "Stimulates thyroid and pituitary glands."
+    ]
+  },
+  {
+    name: "Uttana Shishosana (Extended Puppy Pose)",
+    img: "Yoga images/i15.jpeg",
+    steps: [
+      "Begin on all fours in tabletop position.",
+      "Walk hands forward, keeping hips above knees.",
+      "Lower chest and forehead toward floor, arms extended.",
+      "Hold for 30–60 seconds, breathing deeply."
+    ],
+    benefits: [
+      "Stretches spine, shoulders, and arms.",
+      "Opens chest and lungs.",
+      "Relieves tension in neck and back.",
+      "Calms the mind and reduces stress."
+    ]
+  },
+  {
+    name: "Uttanasana (Standing Forward Bend)",
+    img: "Yoga images/i16.jpeg",
+    steps: [
+      "Stand tall with feet together.",
+      "Exhale, hinge from hips, folding forward.",
+      "Let hands rest on floor, shins, or ankles.",
+      "Relax head and neck, keeping spine long.",
+      "Hold 15–30 seconds."
+    ],
+    benefits: [
+      "Stretches hamstrings, calves, and spine.",
+      "Strengthens thighs and knees.",
+      "Relieves stress, anxiety, and fatigue.",
+      "Stimulates liver and kidneys.",
+      "Improves digestion."
+    ]
+  }
+];
+
+
+
+// Advanced Poses
+const advancedPoses = [
+  {
+    name: "Gomukhasana (Cow Face Pose)",
+    img: "Yoga images/a1.jpeg",
+    steps: [
+      "Sit with legs extended.",
+      "Cross right leg over left, stack knees.",
+      "Bring left arm behind back, right arm over shoulder, clasp hands.",
+      "Keep spine straight, chest open.",
+      "Hold 30–60 seconds, switch sides."
+    ],
+    benefits: [
+      "Opens shoulders, chest, and hips.",
+      "Relieves shoulder and upper back pain.",
+      "Improves posture and spinal flexibility.",
+      "Reduces stress and fatigue.",
+      "Helps with digestive disorders and mild arthritis."
+    ]
+  },
+  {
+    name: "Halasana (Plow Pose)",
+    img: "Yoga images/a2.jpeg",
+    steps: [
+      "Lie on back, legs extended.",
+      "Inhale, lift legs overhead, bring toes to floor behind head.",
+      "Keep arms on floor, palms down, or support lower back.",
+      "Hold 15–30 seconds, exhale and slowly release."
+    ],
+    benefits: [
+      "Stretches spine and shoulders.",
+      "Improves digestion and metabolism.",
+      "Stimulates thyroid and abdominal organs.",
+      "Relieves back pain, fatigue, and stress.",
+      "Helps with insomnia and mild anxiety."
+    ]
+  },
+  {
+    name: "Kapotasana (Pigeon Pose / King Pigeon)",
+    img: "Yoga images/a3.jpeg",
+    steps: [
+      "From Downward Dog, bring right knee forward, place near right wrist.",
+      "Extend left leg back.",
+      "Inhale, lift chest and arms overhead.",
+      "Optionally bend back leg and hold foot with hands.",
+      "Hold 20–30 seconds, switch sides."
+    ],
+    benefits: [
+      "Opens hips and stretches thighs, groin, and spine.",
+      "Relieves lower back pain and sciatica.",
+      "Improves posture and flexibility.",
+      "Reduces stress, fatigue, and mild depression.",
+      "Stimulates abdominal organs and improves digestion."
+    ]
+  },
+  {
+    name: "Mayurasana (Peacock Pose)",
+    img: "Yoga images/a4.jpeg",
+    steps: [
+      "Kneel, place palms on floor fingers pointing backward.",
+      "Lean forward, lift legs and torso parallel to floor.",
+      "Balance on elbows, engage core.",
+      "Hold 10–20 seconds, then release."
+    ],
+    benefits: [
+      "Strengthens wrists, arms, and core muscles.",
+      "Stimulates digestive organs and metabolism.",
+      "Helps with constipation and bloating.",
+      "Improves balance and concentration.",
+      "Reduces fatigue and enhances immunity."
+    ]
+  },
+  {
+    name: "Svarga Dvidasana (Bird of Paradise Pose)",
+    img: "Yoga images/a5.jpeg",
+    steps: [
+      "Stand, lift right leg, hold right ankle with left hand.",
+      "Inhale, lift leg, balance on left foot.",
+      "Extend right arm overhead.",
+      "Hold 15–30 seconds, switch sides."
+    ],
+    benefits: [
+      "Strengthens legs, core, and arms.",
+      "Improves balance, coordination, and focus.",
+      "Opens chest and shoulders, improving breathing.",
+      "Reduces lower back pain and hip stiffness.",
+      "Boosts stamina and energy levels."
+    ]
+  },
+  {
+    name: "Tittibhasana (Firefly Pose)",
+    img: "Yoga images/a6.jpeg",
+    steps: [
+      "Sit with legs extended, hands on floor behind knees.",
+      "Lift legs, extend arms under thighs.",
+      "Balance torso on hands, straighten legs forward.",
+      "Hold 10–20 seconds, breathe steadily."
+    ],
+    benefits: [
+      "Strengthens core, arms, wrists, and shoulders.",
+      "Improves balance and coordination.",
+      "Stimulates digestive organs and metabolism.",
+      "Reduces fatigue and mild stress.",
+      "Enhances flexibility of hamstrings and spine."
+    ]
+  },
+  {
+    name: "Utthita Hasta Padangusthasana (Extended Hand to Big Toe Pose)",
+    img: "Yoga images/a7.jpeg",
+    steps: [
+      "Stand tall, lift right leg forward, hold big toe with right hand.",
+      "Extend left arm sideways, maintain balance.",
+      "Keep spine straight.",
+      "Hold 20–30 seconds, switch sides."
+    ],
+    benefits: [
+      "Strengthens legs, ankles, and core.",
+      "Improves balance, concentration, and posture.",
+      "Stretches hamstrings and spine.",
+      "Reduces lower back pain and fatigue.",
+      "Stimulates abdominal organs."
+    ]
+  },
+  {
+    name: "Urdhva Dandasana (Upward Staff Pose)",
+    img: "Yoga images/a8.jpeg",
+    steps: [
+      "Lie on back, legs extended.",
+      "Inhale, lift torso and legs straight up.",
+      "Hands beside ears, palms on floor.",
+      "Keep spine straight, hold 10–20 seconds, exhale and release."
+    ],
+    benefits: [
+      "Strengthens arms, shoulders, core, and spine.",
+      "Improves posture and back flexibility.",
+      "Stimulates abdominal organs and digestion.",
+      "Reduces fatigue and mild depression.",
+      "Boosts stamina and concentration."
+    ]
+  },
+  {
+    name: "Vasisthasana (Side Plank Pose)",
+    img: "Yoga images/a9.jpeg",
+    steps: [
+      "Start in Plank Pose.",
+      "Shift weight to right hand, stack feet, raise left arm upward.",
+      "Keep body straight.",
+      "Hold 15–30 seconds, switch sides."
+    ],
+    benefits: [
+      "Strengthens arms, wrists, core, and legs.",
+      "Improves balance, posture, and coordination.",
+      "Stimulates digestive and abdominal organs.",
+      "Reduces back pain and mild stress.",
+      "Enhances stamina and concentration."
+    ]
+  },
+  {
+    name: "Virabhadrasana III (Warrior III Pose)",
+    img: "Yoga images/a10.jpeg",
+    steps: [
+      "Stand tall, hinge forward at hips.",
+      "Lift right leg backward, arms extended forward.",
+      "Keep body straight from head to lifted foot.",
+      "Hold 15–30 seconds, switch sides."
+    ],
+    benefits: [
+      "Strengthens legs, core, and shoulders.",
+      "Improves balance, stability, and focus.",
+      "Reduces lower back pain and fatigue.",
+      "Stimulates abdominal organs.",
+      "Improves posture and stamina."
+    ]
+  },
+  {
+    name: "Visvamitrasana (Visvamitra’s Pose)",
+    img: "Yoga images/a11.jpeg",
+    steps: [
+      "From seated, lift right leg, thread left arm under right leg.",
+      "Lift torso and right leg, balance on left hand.",
+      "Extend right arm overhead.",
+      "Hold 10–20 seconds, switch sides."
+    ],
+    benefits: [
+      "Strengthens core, arms, and shoulders.",
+      "Improves balance, flexibility, and coordination.",
+      "Stimulates digestive organs.",
+      "Reduces back pain and fatigue.",
+      "Enhances concentration and mental focus."
+    ]
+  },
+  {
+    name: "Vrichikasana (Scorpion Pose)",
+    img: "Yoga images/a12.jpeg",
+    steps: [
+      "Start in forearm balance.",
+      "Inhale, bend back, bring feet toward head.",
+      "Maintain balance on forearms.",
+      "Hold 10–20 seconds, breathing steadily."
+    ],
+    benefits: [
+      "Strengthens back, shoulders, arms, and core.",
+      "Improves spinal flexibility and posture.",
+      "Stimulates digestive and reproductive organs.",
+      "Reduces fatigue, mild stress, and anxiety.",
+      "Enhances balance, concentration, and body control."
+    ]
+  }
+];
+
+
+
+// Render poses
+function renderPoses(sectionId, poses){
+  const container = document.getElementById(sectionId);
+  container.innerHTML = poses.map(p=>`
+    <div class="pose-card">
+      <h3>${p.name}</h3>
+      <div class="pose-info">
+        <img src="${p.img}" alt="${p.name}">
+        <h4>Steps</h4>
+        <ol>${p.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
+        <h4>Benefits</h4>
+        <ul>${p.benefits.map(b=>`<li>${b}</li>`).join('')}</ul>
+      </div>
+    </div>
+  `).join('');
+}
+
+renderPoses('beginner-section', beginnerPoses);
+renderPoses('intermediate-section', intermediatePoses);
+renderPoses('advanced-section', advancedPoses);
+
+// Difficulty selection
+const boxes = document.querySelectorAll('.difficulty-box');
+const sections = document.querySelectorAll('.pose-section');
+boxes.forEach(box=>{
+  box.addEventListener('click', ()=>{
+    const target = box.getAttribute('data-target');
+    sections.forEach(sec => sec.id === target ? sec.style.display='block' : sec.style.display='none');
+  });
+});
+document.getElementById('beginner-section').style.display='block';
+
+// Toggle pose info when clicking pose name (show steps + benefits)
+document.addEventListener('click', function(e){
+  if(e.target.tagName==='H3' && e.target.closest('.pose-card')){
+    const card = e.target.closest('.pose-card');
+    const info = card.querySelector('.pose-info');
+    
+    // Close other open infos in the same section
+    const allInfos = card.parentElement.querySelectorAll('.pose-info');
+    allInfos.forEach(i => {if(i!==info) i.style.display='none';});
+    
+    info.style.display = info.style.display==='block'?'none':'block';
+  }
+});
+document.getElementById('searchInput').addEventListener('input', function () {
+    const query = this.value.toLowerCase();
+    const cards = document.querySelectorAll('.pose-card');
+    let found = false;
+
+    cards.forEach(card => {
+      const title = card.querySelector('h3').innerText.toLowerCase();
+      if (title.includes(query)) {
+        card.style.display = "flex"; // show matching card
+        found = true;
+      } else {
+        card.style.display = "none"; // hide others
+      }
+    });
+
+    if (!found && query.trim() !== "") {
+      // hide all if nothing matches
+      cards.forEach(card => card.style.display = "none");
+    }
+
+    if (query.trim() === "") {
+      // if search box empty, show all poses
+      cards.forEach(card => card.style.display = "flex");
+    }
+  });
+
+</script>
+</body>
+</html>

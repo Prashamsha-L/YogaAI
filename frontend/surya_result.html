@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Surya Namaskara Results</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+<style>
+  body{font-family:Arial,sans-serif;padding:20px;background:#f5fff5;}
+  h1{text-align:center;margin-bottom:20px;}
+  .pose-card{display:flex;gap:8px;align-items:center;margin-bottom:12px;}
+  .pose-name{font-weight:700;width:200px;}
+  .progress-wrap{height:20px;width:70%;background:#eee;border-radius:4px;overflow:hidden;}
+  .progress-fill{height:100%;width:0%;background:green;transition:width 0.4s ease;}
+  .pose-right{width:60px;text-align:center;font-weight:700;}
+  .button-row{display:flex;justify-content:center;gap:16px;margin:20px 0;}
+  .button-row button{padding:8px 16px;border-radius:8px;background:#4caf50;color:#fff;border:none;cursor:pointer;}
+</style>
+</head>
+<body>
+<h1>Surya Namaskara</h1>
+<div id="poseContainer"></div>
+<div class="button-row">
+  <button onclick="clearSession()">Clear</button>
+  <button onclick="downloadReport()">Download PDF</button>
+  <button onclick="location.href='surya.html'">Back</button>
+</div>
+
+<script>
+function safeParse(v){ try{ return JSON.parse(v||'{}'); } catch(e){ return {}; } }
+function clamp(v,a=0,b=100){ return Math.max(a,Math.min(b,v)); }
+function colorFor(val){ if(val<40) return 'red'; if(val<80) return 'orange'; return 'green'; }
+
+function loadResults(){
+  const data = safeParse(sessionStorage.getItem('sessionResults'));
+  const container = document.getElementById('poseContainer');
+  container.innerHTML='';
+  const poses = Object.keys(data||{});
+  if(!poses.length){ container.innerHTML='<div>To Continue, click on back</div>'; return; }
+
+  poses.forEach(p=>{
+    const entries = data[p];
+    const avg = Math.round(entries.reduce((s,e)=>s+e.accuracy,0)/entries.length);
+    const card = document.createElement('div'); card.className='pose-card';
+    const name = document.createElement('div'); name.className='pose-name'; name.textContent=p;
+    const progWrap = document.createElement('div'); progWrap.className='progress-wrap';
+    const fill = document.createElement('div'); fill.className='progress-fill'; fill.style.width=avg+'%'; fill.style.background=colorFor(avg);
+    progWrap.appendChild(fill);
+    const right = document.createElement('div'); right.className='pose-right'; right.textContent=avg+'%';
+    card.appendChild(name); card.appendChild(progWrap); card.appendChild(right);
+    container.appendChild(card);
+  });
+}
+
+function downloadReport(){ html2pdf().from(document.body).save(); }
+function clearSession(){ if(confirm('Clear session?')){ sessionStorage.removeItem('sessionResults'); location.reload(); } }
+
+window.addEventListener('DOMContentLoaded',loadResults);
+</script>
+</body>
+</html>

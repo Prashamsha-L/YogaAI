@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Yoga Pose Result</title>
+    <style>
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            width: 100%;
+            font-family: Arial, sans-serif;
+        }
+
+        .pose-result {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 23%;               /* 4 per row */
+            min-width: 250px;         /* Responsive */
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background: #fafafa;
+        }
+
+        .pose-name {
+            width: 90px;              /* Adjust name width */
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 18px;
+            border: 1px solid #aaa;
+            background-color: #f0f0f0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .percentage {
+            width: 40px;
+            font-weight: bold;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="pose-result">
+        <span class="pose-name">Mountain</span>
+        <div class="progress-bar">
+            <div class="progress-fill" data-value="90"></div>
+        </div>
+        <span class="percentage">90%</span>
+    </div>
+
+    <div class="pose-result">
+        <span class="pose-name">Tree</span>
+        <div class="progress-bar">
+            <div class="progress-fill" data-value="65"></div>
+        </div>
+        <span class="percentage">65%</span>
+    </div>
+
+    <div class="pose-result">
+        <span class="pose-name">Cobra</span>
+        <div class="progress-bar">
+            <div class="progress-fill" data-value="30"></div>
+        </div>
+        <span class="percentage">30%</span>
+    </div>
+
+    <div class="pose-result">
+        <span class="pose-name">Warrior</span>
+        <div class="progress-bar">
+            <div class="progress-fill" data-value="82"></div>
+        </div>
+        <span class="percentage">82%</span>
+    </div>
+
+    <div class="pose-result">
+        <span class="pose-name">Bridge</span>
+        <div class="progress-bar">
+            <div class="progress-fill" data-value="50"></div>
+        </div>
+        <span class="percentage">50%</span>
+    </div>
+
+    <div class="pose-result">
+        <span class="pose-name">Plank</span>
+        <div class="progress-bar">
+            <div class="progress-fill" data-value="25"></div>
+        </div>
+        <span class="percentage">25%</span>
+    </div>
+</div>
+
+<script>
+    function setProgress(element, value) {
+        element.style.width = value + "%";
+
+        if (value >= 80) {
+            element.style.backgroundColor = "green";
+        } else if (value >= 40) {
+            element.style.backgroundColor = "blue";
+        } else {
+            element.style.backgroundColor = "red";
+        }
+    }
+
+    document.querySelectorAll('.progress-fill').forEach(el => {
+        const value = parseInt(el.getAttribute("data-value"));
+        setProgress(el, value);
+    });
+</script>
+
+</body>
+</html>
