@@ -4,6 +4,50 @@
   <meta charset="UTF-8">
   <title>Yoga Pose Detection</title>
   <style>
+
+    .switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.4s;
+}
+input:checked + .slider {
+  background-color: #4CAF50;
+}
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+.slider.round {
+  border-radius: 34px;
+}
+.slider.round:before {
+  border-radius: 50%;
+}
     body {
       margin: 0;
       font-family: Arial, sans-serif;
@@ -189,6 +233,15 @@ color: white;
 </head>
 <body>
   <div class="video-container">
+
+    <div id="skeleton-toggle" style="position:absolute; top:10px; right:20px; z-index:9999; display:flex; align-items:center; gap:10px;">
+  <label class="switch">
+    <input type="checkbox" id="toggleSkeleton" checked>
+    <span class="slider round"></span>
+  </label>
+  <span style="color:white; font-weight:bold;">Show Skeleton</span>
+</div>
+
     <video id="webcam" autoplay playsinline></video>
     <canvas id="output_canvas"></canvas>
 
@@ -234,6 +287,13 @@ color: white;
     const countdownEl = document.getElementById("countdown");
     const canvasElement = document.getElementById("output_canvas");
     const videoElement = document.getElementById("webcam");
+
+    let showSkeleton = true;
+
+document.getElementById("toggleSkeleton").addEventListener("change", (e) => {
+  window.showSkeleton = e.target.checked;
+});
+
   let camera = null;
   let timerInterval;
   let sessionDuration = 30; // default

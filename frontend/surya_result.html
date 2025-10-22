@@ -7,20 +7,23 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
 <style>
-  body{font-family:Arial,sans-serif;padding:20px;background:#f5fff5;}
-  h1{text-align:center;margin-bottom:20px;}
-  .pose-card{display:flex;gap:8px;align-items:center;margin-bottom:12px;}
-  .pose-name{font-weight:700;width:200px;}
-  .progress-wrap{height:20px;width:70%;background:#eee;border-radius:4px;overflow:hidden;}
-  .progress-fill{height:100%;width:0%;background:green;transition:width 0.4s ease;}
-  .pose-right{width:60px;text-align:center;font-weight:700;}
-  .button-row{display:flex;justify-content:center;gap:16px;margin:20px 0;}
-  .button-row button{padding:8px 16px;border-radius:8px;background:#4caf50;color:#fff;border:none;cursor:pointer;}
+  body { font-family: Arial, sans-serif; padding: 20px; background: #f5fff5; }
+  h1 { text-align: center; margin-bottom: 20px; }
+  .pose-card { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; padding: 8px; border-radius: 8px; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+  .pose-name { font-weight: 700; font-size: 18px; }
+  .progress-wrap { height: 25px; width: 100%; background: #eee; border-radius: 6px; overflow: hidden; }
+  .progress-fill { height: 100%; width: 0%; text-align: center; color: #fff; font-weight: 700; line-height: 25px; border-radius: 6px; transition: width 0.8s ease; }
+  .pose-right { font-weight: 700; margin-top: 4px; }
+  .suggestion { font-size: 14px; color: #444; margin-top: 4px; }
+  .button-row { display: flex; justify-content: center; gap: 16px; margin: 20px 0; }
+  .button-row button { padding: 8px 16px; border-radius: 8px; background: #4caf50; color: #fff; border: none; cursor: pointer; font-weight: 600; }
 </style>
 </head>
 <body>
-<h1>Surya Namaskara</h1>
+
+<h1>Surya Namaskara Results</h1>
 <div id="poseContainer"></div>
+
 <div class="button-row">
   <button onclick="clearSession()">Clear</button>
   <button onclick="downloadReport()">Download PDF</button>
@@ -36,19 +39,57 @@ function loadResults(){
   const data = safeParse(sessionStorage.getItem('sessionResults'));
   const container = document.getElementById('poseContainer');
   container.innerHTML='';
+
   const poses = Object.keys(data||{});
-  if(!poses.length){ container.innerHTML='<div>To Continue, click on back</div>'; return; }
+  if(!poses.length){ container.innerHTML='<div>To Continue, click on Back</div>'; return; }
 
   poses.forEach(p=>{
     const entries = data[p];
-    const avg = Math.round(entries.reduce((s,e)=>s+e.accuracy,0)/entries.length);
-    const card = document.createElement('div'); card.className='pose-card';
-    const name = document.createElement('div'); name.className='pose-name'; name.textContent=p;
-    const progWrap = document.createElement('div'); progWrap.className='progress-wrap';
-    const fill = document.createElement('div'); fill.className='progress-fill'; fill.style.width=avg+'%'; fill.style.background=colorFor(avg);
+
+    // Calculate average accuracy for pose
+    let avg = 0;
+    let suggestion = '';
+    if(Array.isArray(entries)) {
+      avg = Math.round(entries.reduce((s,e)=>s+(e.accuracy||0),0)/entries.length);
+      // if backend sends feedback array, take first suggestion
+      suggestion = entries[0]?.feedback || '';
+    } else {
+      avg = entries.accuracy || 0;
+      suggestion = entries.feedback || '';
+    }
+
+    avg = clamp(avg);
+
+    // Create pose card
+    const card = document.createElement('div'); 
+    card.className = 'pose-card';
+
+    const nameEl = document.createElement('div'); 
+    nameEl.className = 'pose-name'; 
+    nameEl.textContent = p;
+    card.appendChild(nameEl);
+
+    const progWrap = document.createElement('div'); 
+    progWrap.className = 'progress-wrap';
+    const fill = document.createElement('div'); 
+    fill.className = 'progress-fill'; 
+    fill.style.width = '0%'; // animate from 0
+    fill.style.background = colorFor(avg);
+    fill.textContent = avg + '%';
     progWrap.appendChild(fill);
-    const right = document.createElement('div'); right.className='pose-right'; right.textContent=avg+'%';
-    card.appendChild(name); card.appendChild(progWrap); card.appendChild(right);
+    card.appendChild(progWrap);
+
+    // Animate width
+    setTimeout(()=> fill.style.width = avg + '%', 50);
+
+    // Suggestion / insight
+    if(suggestion){
+      const sugEl = document.createElement('div');
+      sugEl.className = 'suggestion';
+      sugEl.textContent = '💡 ' + suggestion;
+      card.appendChild(sugEl);
+    }
+
     container.appendChild(card);
   });
 }
@@ -56,7 +97,8 @@ function loadResults(){
 function downloadReport(){ html2pdf().from(document.body).save(); }
 function clearSession(){ if(confirm('Clear session?')){ sessionStorage.removeItem('sessionResults'); location.reload(); } }
 
-window.addEventListener('DOMContentLoaded',loadResults);
+window.addEventListener('DOMContentLoaded', loadResults);
 </script>
+
 </body>
 </html>

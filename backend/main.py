@@ -225,17 +225,17 @@ async def predict_surya(request: Request):
         if wrong_joints >= 3:
             return JSONResponse({
                 "pose": "No Pose Detected",
-                # "confidence": confidence,
-                # "corrections": corrections,
-                # "feedback": feedback
+                "confidence": confidence,
+                "corrections": corrections,
+                "feedback": feedback
             })
 
         return JSONResponse({
             "pose": pose_name,
-            # "confidence": confidence,
-            # "angles": angles,
-            # "corrections": corrections,
-            # "feedback": feedback
+            "confidence": confidence,
+            "angles": angles,
+            "corrections": corrections,
+            "feedback": feedback
         })
 
     except Exception as e:

@@ -4,6 +4,51 @@
   <meta charset="UTF-8">
   <title>Yoga Pose Detection</title>
   <style>
+    /* ✅ Toggle Switch Style */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.4s;
+}
+input:checked + .slider {
+  background-color: #4CAF50;
+}
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+.slider.round {
+  border-radius: 34px;
+}
+.slider.round:before {
+  border-radius: 50%;
+}
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
@@ -192,6 +237,15 @@ color: white;
 <body>
     
   <div class="video-container">
+    <!-- ✅ Skeleton Toggle -->
+<div id="skeleton-toggle" style="position:absolute; top:10px; right:20px; z-index:9999; display:flex; align-items:center; gap:10px;">
+  <label class="switch">
+    <input type="checkbox" id="toggleSkeleton" checked>
+    <span class="slider round"></span>
+  </label>
+  <span style="color:white; font-weight:bold;">Show Skeleton</span>
+</div>
+
     <video id="webcam" autoplay playsinline></video>
     <canvas id="output_canvas"></canvas>
 
@@ -242,6 +296,13 @@ color: white;
     const videoElement = document.getElementById("webcam");
      const canvasCtx = canvasElement.getContext("2d");
 
+     let showSkeleton = true;
+
+document.getElementById("toggleSkeleton").addEventListener("change", (e) => {
+  showSkeleton = e.target.checked;
+});
+
+
      const suryaPoses = [
       "Pranamasana",
       "Hasta Uttanasana",
@@ -252,6 +313,9 @@ color: white;
       "Bhujangasana",
       "Adho Mukha Svanasana",
       "Ashwa Sanchalanasana - right",
+      "Hasta Uttanasana",
+      "Padahastasana",
+      "Pranamasana",
     ];
 
     let currentPoseIndex = 0;
@@ -281,34 +345,24 @@ function prevPose() {
   updatePoseDisplay();
 }
 
-// Handler that will be called when a Surya pose is detected by surya.js
-// surya.js will call window.onSuryaDetected(poseName)
+const sessionResults = JSON.parse(sessionStorage.getItem("sessionResults")) || {};
+
 window.onSuryaDetected = function(detectedPose) {
-  // Normalize strings (trim, case-insensitive compare)
-  if (!detectedPose) return;
-  const clean = detectedPose.toString().trim().toLowerCase();
-  const expected = (suryaPoses[currentPoseIndex] || "").toLowerCase();
-
-  // Show the raw detected pose in the label as supplementary info
-  const label = document.getElementById("pose-label");
-  if (label) {
-    // keep main display as 'Current Pose: X' but show detected info after it
-    if (currentPoseIndex < suryaPoses.length) {
-      label.textContent = `Current Pose: ${suryaPoses[currentPoseIndex]} — Detected: ${detectedPose}`;
-    } else {
-      label.textContent = `Detected: ${detectedPose}`;
+    if (!detectedPose) return;
+    const expected = suryaPoses[currentPoseIndex];
+    
+    // Save result
+    sessionResults[expected] = detectedPose;
+    sessionStorage.setItem("sessionResults", JSON.stringify(sessionResults));
+    
+    const label = document.getElementById("pose-label");
+    if (label) {
+        label.textContent = `Current Pose: ${expected} — Detected: ${detectedPose}`;
     }
-  }
 
-  // If detected matches expected, advance
-  if (autoAdvanceOnDetect && clean === expected && currentPoseIndex < suryaPoses.length) {
-    // small delay so user sees successful detection
-    setTimeout(() => {
-      nextPose();
-      // announce if you already have announceAsana function
-      if (typeof announceAsana === "function") announceAsana(suryaPoses[currentPoseIndex] || "Completed");
-    }, 700);
-  }
+    if (autoAdvanceOnDetect && detectedPose.toLowerCase() === expected.toLowerCase()) {
+        setTimeout(() => nextPose(), 700);
+    }
 };
 
 // Hook skip button

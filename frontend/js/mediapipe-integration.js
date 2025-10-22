@@ -28,6 +28,9 @@
   let poseHistory = [];
   const POSE_WINDOW = 15;  
   const POSE_THRESHOLD = 0.6;
+
+  window.showSkeleton = true;
+
   
 
 
@@ -294,9 +297,9 @@ canvasCtx.fillText(text, canvasElement.width / 2, 30);
     canvasCtx.restore();
     return;
   }
-
-        // Base skeleton (light gray)
+         if (window.showSkeleton) {
         drawConnectors(canvasCtx, results.poseLandmarks, POSE_CONNECTIONS, { color: '#AAAAAA', lineWidth: 1.5 });
+         }
 
         // ANGLES + SMOOTHING
         const rawAngles = buildAngleVector(results.poseLandmarks);
@@ -338,6 +341,7 @@ canvasCtx.fillText(text, canvasElement.width / 2, 30);
         }
 
         // DRAW corrections overlay (if backend returned any)
+        if (window.showSkeleton) {
         const corrections = window.latestCorrections || {};
         const jointMap = {
           left_elbow: 13,
@@ -387,7 +391,7 @@ canvasCtx.fillText(text, canvasElement.width / 2, 30);
             canvasCtx.lineWidth = 1.5;
             canvasCtx.stroke();
           }
-        }
+        }}
       
 
       canvasCtx.restore();
