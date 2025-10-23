@@ -216,7 +216,7 @@ async def predict_surya(request: Request):
         corrections, feedback = check_pose(pose_name, raw.tolist(), joint_names)
         wrong_joints = sum(1 for c in corrections.values() if c != "green")
 
-        if wrong_joints >= 3:
+        if wrong_joints >= 5:
             return JSONResponse({
                 "pose": "No Pose Detected",
                 "confidence": confidence,
