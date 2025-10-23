@@ -166,12 +166,6 @@ async def predict_pose(request: Request):
         "feedback": feedback
     })
 
-        # print(f"Predicted Pose: {pose_name} ({confidence:.2f})" if confidence else f"Predicted Pose: {pose_name}")
-
-        # if angles:
-        #     corrections, feedback = check_pose(pose_name, angles, joint_names)
-        # else:
-        #     corrections, feedback = {}, [] 
 
         return JSONResponse({
         "pose": pose_name,
