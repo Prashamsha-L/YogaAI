@@ -158,7 +158,7 @@ async def predict_pose(request: Request):
         logger.info(f"Feedback       : {feedback}")
         logger.info("============================\n")
 
-        if wrong_joints >= 3:  
+        if wrong_joints >= 5:  
             return JSONResponse({
         "pose": "No Pose Detected",
         "confidence": confidence,
